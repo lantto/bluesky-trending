@@ -8,6 +8,8 @@ let ws = null;
 const RATE_CALCULATION_WINDOW = 30000; // 30 seconds in milliseconds
 const POST_AGE_LIMIT = 60000; // 1 minute in milliseconds
 const MIN_LIKES_PER_SECOND = 0.2;
+const FIRE_THRESHOLD_HIGH = 1.0;  // Threshold to become "on fire"
+const FIRE_THRESHOLD_LOW = 0.8;   // Threshold to lose "on fire" status
 
 function connect() {
     const url = "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.like";
@@ -211,10 +213,17 @@ function updateTopPostsList() {
             // Update existing post
             const likesSpan = existingElement.querySelector('.likes');
             const likesPerSecond = calculateRecentLikesPerSecond(post);
-            const likesInfo = `❤️ ${post.likes} (${likesPerSecond.toFixed(2)}/s)${likesPerSecond > 1 ? ' 🔥' : ''}`;
+            const isCurrentlyOnFire = likesSpan.classList.contains('on-fire');
+            
+            // Apply hysteresis and minimum likes requirement
+            const shouldBeOnFire = post.likes >= 10 && (isCurrentlyOnFire 
+                ? likesPerSecond >= FIRE_THRESHOLD_LOW    // Keep fire if above low threshold
+                : likesPerSecond >= FIRE_THRESHOLD_HIGH); // Need to exceed high threshold to gain fire
+            
+            const likesInfo = `❤️ ${post.likes} (${likesPerSecond.toFixed(2)}/s)${shouldBeOnFire ? ' 🔥' : ''}`;
             if (likesSpan.textContent !== likesInfo) {
                 likesSpan.textContent = likesInfo;
-                likesSpan.classList.toggle('on-fire', likesPerSecond > 1);
+                likesSpan.classList.toggle('on-fire', shouldBeOnFire);
             }
             
             // Update profile info if it was just fetched
@@ -280,8 +289,8 @@ function updateTopPostsList() {
                         ` : ''}
                     </div>
                 </div>
-                <div class="likes ${calculateRecentLikesPerSecond(post) > 1 ? 'on-fire' : ''}">
-                    ❤️ ${post.likes} (${(calculateRecentLikesPerSecond(post)).toFixed(2)}/s)${calculateRecentLikesPerSecond(post) > 1 ? ' 🔥' : ''}
+                <div class="likes ${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? 'on-fire' : ''}">
+                    ❤️ ${post.likes} (${(calculateRecentLikesPerSecond(post)).toFixed(2)}/s)${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? ' 🔥' : ''}
                 </div>
                 <div class="post-content">
                     ${formatMessage(post.message, post.facets)}
