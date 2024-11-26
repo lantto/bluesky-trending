@@ -55,7 +55,7 @@ function updateTopPostsList() {
     const postsArray = Object.entries(posts)
         .filter(([_, post]) => post.likes > 0)
         .sort((a, b) => b[1].likes - a[1].likes)
-        .slice(0, 10);
+        .slice(0, 20);
     
     // Check for posts that need profile fetching
     postsArray.forEach(([cid, post]) => {

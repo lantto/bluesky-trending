@@ -1,77 +1,194 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>BlueSky Top Posts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        .post-list {
-            max-width: 600px;
-            margin: 20px auto;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .post-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            background: #fff;
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f8fa;
+            color: #1c2024;
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #0066cc;
             margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .likes {
-            font-weight: bold;
-            color: #ff4d4d;
-            display: inline-block;
-            margin: 10px 0;
+
+        .header p {
+            color: #536471;
+            font-size: 1.1em;
         }
+
+        .post-list {
+            max-width: 700px;
+            margin: 0 auto;
+            display: grid;
+            gap: 20px;
+        }
+
+        .post-item {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .post-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+
         .profile-info {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
+
         .avatar {
-            width: 48px;
-            height: 48px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            margin-right: 10px;
+            margin-right: 15px;
             object-fit: cover;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
+
         .avatar-placeholder {
-            width: 48px;
-            height: 48px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            background: #eee;
-            margin-right: 10px;
+            margin-right: 15px;
+            background: linear-gradient(135deg, #e6e9ec 0%, #f2f4f6 100%);
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
+
         .profile-details {
             flex-grow: 1;
         }
+
         .display-name {
-            font-weight: bold;
+            font-weight: 600;
             font-size: 1.1em;
+            color: #1c2024;
+            margin-bottom: 2px;
         }
+
         .handle {
-            color: #666;
-            font-size: 0.9em;
+            color: #536471;
+            font-size: 0.95em;
         }
-        .profile-stats {
-            color: #666;
-            font-size: 0.9em;
+
+        .likes {
+            font-weight: 500;
+            color: #f91880;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(249, 24, 128, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
             margin: 10px 0;
+            font-size: 0.95em;
         }
-        .profile-stats span {
-            margin-right: 15px;
+
+        .post-content {
+            font-size: 1.05em;
+            line-height: 1.6;
+            margin: 15px 0;
+            color: #0f1419;
         }
-        .post-meta {
-            margin-top: 10px;
-        }
-        .post-links a {
-            color: #1da1f2;
+
+        .post-content a {
+            color: #0066cc;
             text-decoration: none;
-            margin-right: 15px;
         }
-        .post-links a:hover {
+
+        .post-content a:hover {
             text-decoration: underline;
+        }
+
+        .hashtag {
+            color: #0066cc;
+            font-weight: 500;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 20px;
+            color: #536471;
+            font-size: 0.95em;
+            margin: 15px 0;
+            padding: 15px 0;
+            border-top: 1px solid #ebeef0;
+            border-bottom: 1px solid #ebeef0;
+        }
+
+        .profile-stats span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .post-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .post-links a {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 0.95em;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(0, 102, 204, 0.1);
+            transition: background 0.2s ease;
+        }
+
+        .post-links a:hover {
+            background: rgba(0, 102, 204, 0.15);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .post-list {
+                max-width: 100%;
+            }
+
+            .post-item {
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1>BlueSky Trending Posts</h1>
+        <p>Real-time updates of the most liked posts</p>
+    </div>
     <div id="topPosts" class="post-list"></div>
     <script src="script.js"></script>
 </body>
