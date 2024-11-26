@@ -170,8 +170,10 @@ function updateTopPostsList() {
         if (existingElement) {
             // Update existing post
             const likesSpan = existingElement.querySelector('.likes');
-            if (likesSpan.textContent !== `❤️ ${post.likes}`) {
-                likesSpan.textContent = `❤️ ${post.likes}`;
+            const likesPerSecond = post.likes / ((Date.now() - post.timestamp) / 1000);
+            const likesInfo = `❤️ ${post.likes} (${likesPerSecond.toFixed(2)}/s)`;
+            if (likesSpan.textContent !== likesInfo) {
+                likesSpan.textContent = likesInfo;
             }
             
             // Update profile info if it was just fetched
@@ -236,7 +238,7 @@ function updateTopPostsList() {
                     </div>
                     <span class="timestamp">${new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
-                <div class="likes">❤️ ${post.likes}</div>
+                <div class="likes">❤️ ${post.likes} (${(post.likes / ((Date.now() - post.timestamp) / 1000)).toFixed(2)}/s)</div>
                 <div class="post-content">
                     ${formatMessage(post.message, post.facets)}
                     ${imagesHtml}
