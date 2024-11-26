@@ -227,8 +227,8 @@ function updateTopPostsList() {
                             <div class="handle">@${post.profile.handle}</div>
                         </div>
                         <div class="compact-stats">
-                            <span>👥 ${post.profile.followersCount.toLocaleString()}</span>
-                            <span>📝 ${post.profile.postsCount.toLocaleString()}</span>
+                            <span>${post.profile.followersCount.toLocaleString()} 👥</span>
+                            <span>${post.profile.postsCount.toLocaleString()} 📝</span>
                         </div>
                     </div>
                 `;
@@ -273,8 +273,8 @@ function updateTopPostsList() {
                         </div>
                         ${post.profile ? `
                             <div class="compact-stats">
-                                <span>👥 ${post.profile.followersCount.toLocaleString()}</span>
-                                <span>📝 ${post.profile.postsCount.toLocaleString()}</span>
+                                <span>${post.profile.followersCount.toLocaleString()} 👥</span>
+                                <span>${post.profile.postsCount.toLocaleString()} 📝</span>
                             </div>
                         ` : ''}
                     </div>
