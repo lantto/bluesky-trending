@@ -17,7 +17,7 @@ function connect() {
     ws = new WebSocket(url);
 
     ws.onopen = () => {
-        console.log("Connected to BlueSky WebSocket");
+        console.log("Connected to Bluesky WebSocket");
         // Reset reconnection attempts on successful connection
         reconnectAttempts = 0;
     };
@@ -302,7 +302,7 @@ function updateTopPostsList() {
                 </div>
                 <div class="post-meta">
                     <div class="post-links">
-                        <a href="${post.url}" target="_blank">View on BlueSky</a>
+                        <a href="${post.url}" target="_blank">View on Bluesky</a>
                         ${post.parentUrl ? `<a href="${post.parentUrl}" target="_blank">View Parent Post</a>` : ''}
                     </div>
                     <div class="meta-info">
