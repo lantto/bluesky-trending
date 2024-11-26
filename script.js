@@ -4,6 +4,11 @@ const MAX_RECONNECT_DELAY_MS = 30000; // Maximum delay of 30 seconds
 let reconnectAttempts = 0;
 let ws = null;
 
+// Add after the posts object declaration
+const RATE_CALCULATION_WINDOW = 30000; // 30 seconds in milliseconds
+const POST_AGE_LIMIT = 60000; // 1 minute in milliseconds
+const MIN_LIKES_PER_SECOND = 0.2;
+
 function connect() {
     const url = "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.like";
     
@@ -28,6 +33,7 @@ function connect() {
                     message: json.commit.record.text,
                     facets: json.commit.record.facets,
                     likes: 0,
+                    likeHistory: [], // Add this line to track like timestamps
                     did: json.did,
                     url: `https://bsky.app/profile/${json.did}/post/${json.commit.rkey}`,
                     parentUrl: json.commit.record.reply ? 
@@ -50,6 +56,7 @@ function connect() {
                     post.firstLikeTimestamp = Date.now();
                 }
                 post.likes++;
+                post.likeHistory.push(Date.now()); // Add this line to record like timestamp
                 updateTopPostsList();
             }
         }
@@ -129,7 +136,40 @@ function getImageUrls(record, did) {
     }));
 }
 
+// Add this function to calculate recent likes per second
+function calculateRecentLikesPerSecond(post) {
+    const now = Date.now();
+    const recentLikes = post.likeHistory.filter(timestamp => 
+        now - timestamp <= RATE_CALCULATION_WINDOW
+    ).length;
+    
+    // Calculate rate based on either the full window or time since first like
+    const timeWindow = Math.min(
+        RATE_CALCULATION_WINDOW,
+        now - post.timestamp
+    ) / 1000; // Convert to seconds
+    
+    return recentLikes / timeWindow;
+}
+
+// Add this function to clean up old posts
+function cleanupOldPosts() {
+    const now = Date.now();
+    Object.entries(posts).forEach(([cid, post]) => {
+        const postAge = now - post.timestamp;
+        const likesPerSecond = calculateRecentLikesPerSecond(post);
+        
+        if (postAge > POST_AGE_LIMIT && likesPerSecond < MIN_LIKES_PER_SECOND) {
+            delete posts[cid];
+        }
+    });
+}
+
+// Modify the updateTopPostsList function to call cleanup before updating
 function updateTopPostsList() {
+    // Add this line at the start of the function
+    cleanupOldPosts();
+    
     const topPostsDiv = document.getElementById('topPosts');
     const postsArray = Object.entries(posts)
         .filter(([_, post]) => post.likes > 0)
@@ -170,7 +210,7 @@ function updateTopPostsList() {
         if (existingElement) {
             // Update existing post
             const likesSpan = existingElement.querySelector('.likes');
-            const likesPerSecond = post.likes / ((Date.now() - post.timestamp) / 1000);
+            const likesPerSecond = calculateRecentLikesPerSecond(post);
             const likesInfo = `❤️ ${post.likes} (${likesPerSecond.toFixed(2)}/s)`;
             if (likesSpan.textContent !== likesInfo) {
                 likesSpan.textContent = likesInfo;
