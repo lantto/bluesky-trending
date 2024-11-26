@@ -92,7 +92,6 @@
             color: #536471;
             font-size: 0.85em;
             text-align: right;
-            margin-right: 15px;
         }
 
         .compact-stats span {
@@ -232,6 +231,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .likes.on-fire {
@@ -251,6 +252,19 @@
             100% {
                 transform: scale(1);
             }
+        }
+
+        .meta-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #536471;
+            font-size: 0.9em;
+        }
+
+        .rate {
+            color: #f91880;
+            font-weight: 500;
         }
     </style>
 </head>

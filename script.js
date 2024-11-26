@@ -220,11 +220,15 @@ function updateTopPostsList() {
                 ? likesPerSecond >= FIRE_THRESHOLD_LOW    // Keep fire if above low threshold
                 : likesPerSecond >= FIRE_THRESHOLD_HIGH); // Need to exceed high threshold to gain fire
             
-            const likesInfo = `❤️ ${post.likes} (${likesPerSecond.toFixed(2)}/s)${shouldBeOnFire ? ' 🔥' : ''}`;
+            const likesInfo = `${shouldBeOnFire ? '🔥' : '❤️'} ${post.likes}`;
             if (likesSpan.textContent !== likesInfo) {
                 likesSpan.textContent = likesInfo;
                 likesSpan.classList.toggle('on-fire', shouldBeOnFire);
             }
+            
+            // Add rate update
+            const rateSpan = existingElement.querySelector('.rate');
+            rateSpan.textContent = `${likesPerSecond.toFixed(2)}❤️/s`;
             
             // Update profile info if it was just fetched
             if (post.profile && existingElement.querySelector('.display-name').textContent === 'Loading...') {
@@ -290,7 +294,7 @@ function updateTopPostsList() {
                     </div>
                 </div>
                 <div class="likes ${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? 'on-fire' : ''}">
-                    ❤️ ${post.likes} (${(calculateRecentLikesPerSecond(post)).toFixed(2)}/s)${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? ' 🔥' : ''}
+                    ${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? '🔥' : '❤️'} ${post.likes}
                 </div>
                 <div class="post-content">
                     ${formatMessage(post.message, post.facets)}
@@ -301,7 +305,10 @@ function updateTopPostsList() {
                         <a href="${post.url}" target="_blank">View on BlueSky</a>
                         ${post.parentUrl ? `<a href="${post.parentUrl}" target="_blank">View Parent Post</a>` : ''}
                     </div>
-                    <span class="timestamp">${new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    <div class="meta-info">
+                        <span class="rate">${(calculateRecentLikesPerSecond(post)).toFixed(2)}❤️/s</span>
+                        <span class="timestamp">${new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
                 </div>
             `;
             
