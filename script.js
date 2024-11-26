@@ -1,11 +1,74 @@
-// const url = "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.like&wantedCollections=app.bsky.graph.follow";
+// Add reconnection configuration
+const RECONNECT_DELAY_MS = 3000; // Initial delay of 3 seconds
+const MAX_RECONNECT_DELAY_MS = 30000; // Maximum delay of 30 seconds
+let reconnectAttempts = 0;
+let ws = null;
 
-const url = "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.like";
+function connect() {
+    const url = "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.like";
+    
+    ws = new WebSocket(url);
 
-const ws = new WebSocket(url);
-ws.onopen = () => {
-    console.log("Connected to BlueSky WebSocket");
-};
+    ws.onopen = () => {
+        console.log("Connected to BlueSky WebSocket");
+        // Reset reconnection attempts on successful connection
+        reconnectAttempts = 0;
+    };
+
+    ws.onmessage = (event) => {
+        const json = JSON.parse(event.data);
+
+        if (json.kind !== 'commit') return;
+
+        if (json.commit.collection === 'app.bsky.feed.post') {
+            if (!json.commit.record) return;
+
+            if (json.commit.operation === 'create') {
+                posts[json.commit.cid] = {
+                    message: json.commit.record.text,
+                    facets: json.commit.record.facets,
+                    likes: 0,
+                    did: json.did,
+                    url: `https://bsky.app/profile/${json.did}/post/${json.commit.rkey}`,
+                    parentUrl: json.commit.record.reply ? 
+                        `https://bsky.app/profile/${json.commit.record.reply.parent.uri.split('//')[1].split('/')[0]}/post/${json.commit.record.reply.parent.uri.split('/').pop()}` : 
+                        null,
+                    profile: null,
+                    images: getImageUrls(json.commit.record, json.did),
+                    timestamp: Date.now()
+                };
+            }
+        }
+
+        if (json.commit.collection === 'app.bsky.feed.like') {
+            if (!json.commit.record) return;
+
+            if (json.commit.operation === 'create' && json.commit.record.subject.cid in posts) {
+                const post = posts[json.commit.record.subject.cid];
+                post.likes++;
+                updateTopPostsList();
+            }
+        }
+    };
+
+    ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+    };
+
+    ws.onclose = (event) => {
+        console.log(`WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason}`);
+        
+        // Calculate exponential backoff delay
+        const delay = Math.min(RECONNECT_DELAY_MS * Math.pow(2, reconnectAttempts), MAX_RECONNECT_DELAY_MS);
+        reconnectAttempts++;
+        
+        console.log(`Attempting to reconnect in ${delay/1000} seconds...`);
+        setTimeout(connect, delay);
+    };
+}
+
+// Start initial connection
+connect();
 
 const posts = {};
 
@@ -206,47 +269,3 @@ function toggleImages(button) {
     container.style.display = isHidden ? 'grid' : 'none';
     button.textContent = isHidden ? 'Hide images' : `Show ${container.children.length} image${container.children.length > 1 ? 's' : ''}`;
 }
-
-ws.onmessage = (event) => {
-    const json = JSON.parse(event.data);
-
-    if (json.kind !== 'commit') return;
-
-    if (json.commit.collection === 'app.bsky.feed.post') {
-        if (!json.commit.record) return;
-
-        if (json.commit.operation === 'create') {
-            posts[json.commit.cid] = {
-                message: json.commit.record.text,
-                facets: json.commit.record.facets,
-                likes: 0,
-                did: json.did,
-                url: `https://bsky.app/profile/${json.did}/post/${json.commit.rkey}`,
-                parentUrl: json.commit.record.reply ? 
-                    `https://bsky.app/profile/${json.commit.record.reply.parent.uri.split('//')[1].split('/')[0]}/post/${json.commit.record.reply.parent.uri.split('/').pop()}` : 
-                    null,
-                profile: null,
-                images: getImageUrls(json.commit.record, json.did),
-                timestamp: Date.now()
-            };
-        }
-    }
-
-    if (json.commit.collection === 'app.bsky.feed.like') {
-        if (!json.commit.record) return;
-
-        if (json.commit.operation === 'create' && json.commit.record.subject.cid in posts) {
-            const post = posts[json.commit.record.subject.cid];
-            post.likes++;
-            updateTopPostsList();
-        }
-    }
-};
-
-ws.onerror = (error) => {
-    console.error("WebSocket error:", error);
-};
-
-ws.onclose = () => {
-    console.log("WebSocket connection closed");
-};
