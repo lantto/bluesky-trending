@@ -11,6 +11,9 @@ const MIN_LIKES_PER_SECOND = 0.2;
 const FIRE_THRESHOLD_HIGH = 1.0;  // Threshold to become "on fire"
 const FIRE_THRESHOLD_LOW = 0.8;   // Threshold to lose "on fire" status
 
+// Add these variables near the top with other constants
+let startTime = null;
+
 function connect() {
     const url = "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.like";
     
@@ -56,9 +59,13 @@ function connect() {
                 const post = posts[json.commit.record.subject.cid];
                 if (post.likes === 0) {
                     post.firstLikeTimestamp = Date.now();
+                    if (startTime === null) {
+                        startTime = Date.now();
+                        setInterval(updateTrackingDuration, 1000);
+                    }
                 }
                 post.likes++;
-                post.likeHistory.push(Date.now()); // Add this line to record like timestamp
+                post.likeHistory.push(Date.now());
                 updateTopPostsList();
             }
         }
@@ -329,4 +336,21 @@ function toggleImages(button) {
     const isHidden = container.style.display === 'none';
     container.style.display = isHidden ? 'grid' : 'none';
     button.textContent = isHidden ? 'Hide images' : `Show ${container.children.length} image${container.children.length > 1 ? 's' : ''}`;
+}
+
+// Modify updateTrackingDuration to handle the case when tracking hasn't started
+function updateTrackingDuration() {
+    const trackingStatus = document.getElementById('tracking-status');
+    
+    if (startTime === null) {
+        trackingStatus.textContent = "Gathering posts...";
+        return;
+    }
+    
+    const elapsedMinutes = Math.floor((Date.now() - startTime) / 60000);
+    if (elapsedMinutes < 1) {
+        trackingStatus.textContent = "Tracking for <1 minute";
+    } else {
+        trackingStatus.textContent = `Tracking for ${elapsedMinutes} minute${elapsedMinutes === 1 ? '' : 's'}`;
+    }
 }
