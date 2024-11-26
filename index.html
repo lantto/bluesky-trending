@@ -199,16 +199,15 @@
 
         .images-container {
             display: none;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            flex-direction: column;
             gap: 10px;
             margin-top: 10px;
         }
 
         .images-container img {
             width: 100%;
+            height: auto;
             border-radius: 12px;
-            object-fit: cover;
-            aspect-ratio: 16/9;
             transition: transform 0.2s ease;
         }
 

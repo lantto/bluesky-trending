@@ -35,7 +35,8 @@ function connect() {
                         null,
                     profile: null,
                     images: getImageUrls(json.commit.record, json.did),
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    firstLikeTimestamp: null
                 };
             }
         }
@@ -45,6 +46,9 @@ function connect() {
 
             if (json.commit.operation === 'create' && json.commit.record.subject.cid in posts) {
                 const post = posts[json.commit.record.subject.cid];
+                if (post.likes === 0) {
+                    post.firstLikeTimestamp = Date.now();
+                }
                 post.likes++;
                 updateTopPostsList();
             }
@@ -133,8 +137,8 @@ function updateTopPostsList() {
             // First sort by likes
             const likeDiff = b[1].likes - a[1].likes;
             if (likeDiff !== 0) return likeDiff;
-            // If likes are equal, sort by oldest first
-            return a[1].timestamp - b[1].timestamp;
+            // If likes are equal, sort by earliest first like
+            return a[1].firstLikeTimestamp - b[1].firstLikeTimestamp;
         })
         .slice(0, 20);
     
