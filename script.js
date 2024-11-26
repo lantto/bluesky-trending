@@ -50,6 +50,18 @@ async function fetchProfile(did) {
     }
 }
 
+// Add this function to handle image embeds
+function getImageUrls(record, did) {
+    if (!record.embed || record.embed.$type !== 'app.bsky.embed.images') {
+        return null;
+    }
+    
+    return record.embed.images.map(image => ({
+        url: `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${image.image.ref.$link}@jpeg`,
+        alt: image.alt || ''
+    }));
+}
+
 function updateTopPostsList() {
     const topPostsDiv = document.getElementById('topPosts');
     const postsArray = Object.entries(posts)
@@ -123,6 +135,21 @@ function updateTopPostsList() {
             const newElement = document.createElement('div');
             newElement.className = 'post-item';
             newElement.dataset.cid = cid;
+            
+            // Create the images section HTML if there are images
+            const imagesHtml = post.images ? `
+                <div class="post-images">
+                    <button class="show-images-btn" onclick="toggleImages(this)">
+                        Show ${post.images.length} image${post.images.length > 1 ? 's' : ''}
+                    </button>
+                    <div class="images-container" style="display: none;">
+                        ${post.images.map(img => `
+                            <img src="${img.url}" alt="${img.alt}" loading="lazy">
+                        `).join('')}
+                    </div>
+                </div>
+            ` : '';
+
             newElement.innerHTML = `
                 <div class="profile-info">
                     ${post.profile ? 
@@ -134,13 +161,16 @@ function updateTopPostsList() {
                         <div class="handle">${post.profile ? `@${post.profile.handle}` : `@${post.did.slice(0, 8)}...`}</div>
                     </div>
                 </div>
-                <span class="likes">❤️ ${post.likes}</span>
-                <p>${formatMessage(post.message, post.facets)}</p>
+                <div class="likes">❤️ ${post.likes}</div>
+                <div class="post-content">
+                    ${formatMessage(post.message, post.facets)}
+                    ${imagesHtml}
+                </div>
                 <div class="post-meta">
                     ${post.profile ? `
                         <div class="profile-stats">
-                            <span>👥 ${post.profile.followersCount} followers</span>
-                            <span>📝 ${post.profile.postsCount} posts</span>
+                            <span>👥 ${post.profile.followersCount.toLocaleString()} followers</span>
+                            <span>📝 ${post.profile.postsCount.toLocaleString()} posts</span>
                         </div>
                     ` : ''}
                     <div class="post-links">
@@ -161,6 +191,14 @@ function updateTopPostsList() {
     existingPosts.forEach(element => element.remove());
 }
 
+// Add this function to handle image toggling
+function toggleImages(button) {
+    const container = button.nextElementSibling;
+    const isHidden = container.style.display === 'none';
+    container.style.display = isHidden ? 'grid' : 'none';
+    button.textContent = isHidden ? 'Hide images' : `Show ${container.children.length} image${container.children.length > 1 ? 's' : ''}`;
+}
+
 ws.onmessage = (event) => {
     const json = JSON.parse(event.data);
 
@@ -179,7 +217,8 @@ ws.onmessage = (event) => {
                 parentUrl: json.commit.record.reply ? 
                     `https://bsky.app/profile/${json.commit.record.reply.parent.uri.split('//')[1].split('/')[0]}/post/${json.commit.record.reply.parent.uri.split('/').pop()}` : 
                     null,
-                profile: null
+                profile: null,
+                images: getImageUrls(json.commit.record, json.did)
             };
         }
     }
