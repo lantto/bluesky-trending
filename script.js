@@ -211,9 +211,10 @@ function updateTopPostsList() {
             // Update existing post
             const likesSpan = existingElement.querySelector('.likes');
             const likesPerSecond = calculateRecentLikesPerSecond(post);
-            const likesInfo = `❤️ ${post.likes} (${likesPerSecond.toFixed(2)}/s)`;
+            const likesInfo = `❤️ ${post.likes} (${likesPerSecond.toFixed(2)}/s)${likesPerSecond > 1 ? ' 🔥' : ''}`;
             if (likesSpan.textContent !== likesInfo) {
                 likesSpan.textContent = likesInfo;
+                likesSpan.classList.toggle('on-fire', likesPerSecond > 1);
             }
             
             // Update profile info if it was just fetched
@@ -279,7 +280,9 @@ function updateTopPostsList() {
                         ` : ''}
                     </div>
                 </div>
-                <div class="likes">❤️ ${post.likes} (${(post.likes / ((Date.now() - post.timestamp) / 1000)).toFixed(2)}/s)</div>
+                <div class="likes ${calculateRecentLikesPerSecond(post) > 1 ? 'on-fire' : ''}">
+                    ❤️ ${post.likes} (${(calculateRecentLikesPerSecond(post)).toFixed(2)}/s)${calculateRecentLikesPerSecond(post) > 1 ? ' 🔥' : ''}
+                </div>
                 <div class="post-content">
                     ${formatMessage(post.message, post.facets)}
                     ${imagesHtml}
