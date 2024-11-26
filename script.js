@@ -66,12 +66,18 @@ function updateTopPostsList() {
     const topPostsDiv = document.getElementById('topPosts');
     const postsArray = Object.entries(posts)
         .filter(([_, post]) => post.likes > 0)
-        .sort((a, b) => b[1].likes - a[1].likes)
+        .sort((a, b) => {
+            // First sort by likes
+            const likeDiff = b[1].likes - a[1].likes;
+            if (likeDiff !== 0) return likeDiff;
+            // If likes are equal, sort by oldest first
+            return a[1].timestamp - b[1].timestamp;
+        })
         .slice(0, 20);
     
     // Check for posts that need profile fetching
-    postsArray.forEach(([cid, post]) => {
-        if (!post.profile && post.likes >= 10) {
+    postsArray.forEach(([cid, post], index) => {
+        if (!post.profile && (index === 0 || post.likes >= 10)) { // Always fetch for index 0
             // Fetch profile if not already fetching
             if (!post.fetchingProfile) {
                 post.fetchingProfile = true;
@@ -110,6 +116,7 @@ function updateTopPostsList() {
                         <div class="display-name">${post.profile.displayName}</div>
                         <div class="handle">@${post.profile.handle}</div>
                     </div>
+                    <span class="timestamp">${new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 `;
                 
                 // Update profile stats
@@ -160,6 +167,7 @@ function updateTopPostsList() {
                         <div class="display-name">${post.profile ? post.profile.displayName : 'Loading...'}</div>
                         <div class="handle">${post.profile ? `@${post.profile.handle}` : `@${post.did.slice(0, 8)}...`}</div>
                     </div>
+                    <span class="timestamp">${new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
                 <div class="likes">❤️ ${post.likes}</div>
                 <div class="post-content">
@@ -218,7 +226,8 @@ ws.onmessage = (event) => {
                     `https://bsky.app/profile/${json.commit.record.reply.parent.uri.split('//')[1].split('/')[0]}/post/${json.commit.record.reply.parent.uri.split('/').pop()}` : 
                     null,
                 profile: null,
-                images: getImageUrls(json.commit.record, json.did)
+                images: getImageUrls(json.commit.record, json.did),
+                timestamp: Date.now()
             };
         }
     }
