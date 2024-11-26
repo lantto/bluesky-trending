@@ -222,22 +222,16 @@ function updateTopPostsList() {
                 profileInfo.innerHTML = `
                     <img src="${post.profile.avatar}" class="avatar" alt="Profile picture">
                     <div class="profile-details">
-                        <div class="display-name">${post.profile.displayName}</div>
-                        <div class="handle">@${post.profile.handle}</div>
+                        <div class="name-handle">
+                            <div class="display-name">${post.profile.displayName}</div>
+                            <div class="handle">@${post.profile.handle}</div>
+                        </div>
+                        <div class="compact-stats">
+                            <span>👥 ${post.profile.followersCount.toLocaleString()}</span>
+                            <span>📝 ${post.profile.postsCount.toLocaleString()}</span>
+                        </div>
                     </div>
-                    <span class="timestamp">${new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 `;
-                
-                // Update profile stats
-                const postMeta = existingElement.querySelector('.post-meta');
-                const statsHtml = `
-                    <div class="profile-stats">
-                        <span>👥 ${post.profile.followersCount} followers</span>
-                        <span>📝 ${post.profile.postsCount} posts</span>
-                    </div>
-                    ${postMeta.querySelector('.post-links').outerHTML}
-                `;
-                postMeta.innerHTML = statsHtml;
             }
             
             // Move the element to the correct position if needed
@@ -273,10 +267,17 @@ function updateTopPostsList() {
                         '<div class="avatar-placeholder"></div>'
                     }
                     <div class="profile-details">
-                        <div class="display-name">${post.profile ? post.profile.displayName : 'Loading...'}</div>
-                        <div class="handle">${post.profile ? `@${post.profile.handle}` : `@${post.did.slice(0, 8)}...`}</div>
+                        <div class="name-handle">
+                            <div class="display-name">${post.profile ? post.profile.displayName : 'Loading...'}</div>
+                            <div class="handle">${post.profile ? `@${post.profile.handle}` : `@${post.did.slice(0, 8)}...`}</div>
+                        </div>
+                        ${post.profile ? `
+                            <div class="compact-stats">
+                                <span>👥 ${post.profile.followersCount.toLocaleString()}</span>
+                                <span>📝 ${post.profile.postsCount.toLocaleString()}</span>
+                            </div>
+                        ` : ''}
                     </div>
-                    <span class="timestamp">${new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
                 <div class="likes">❤️ ${post.likes} (${(post.likes / ((Date.now() - post.timestamp) / 1000)).toFixed(2)}/s)</div>
                 <div class="post-content">
@@ -284,16 +285,11 @@ function updateTopPostsList() {
                     ${imagesHtml}
                 </div>
                 <div class="post-meta">
-                    ${post.profile ? `
-                        <div class="profile-stats">
-                            <span>👥 ${post.profile.followersCount.toLocaleString()} followers</span>
-                            <span>📝 ${post.profile.postsCount.toLocaleString()} posts</span>
-                        </div>
-                    ` : ''}
                     <div class="post-links">
                         <a href="${post.url}" target="_blank">View on BlueSky</a>
                         ${post.parentUrl ? `<a href="${post.parentUrl}" target="_blank">View Parent Post</a>` : ''}
                     </div>
+                    <span class="timestamp">${new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
             `;
             
