@@ -306,7 +306,6 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            gap: 5px;
             color: #536471;
             font-size: 0.85em;
         }
@@ -436,6 +435,17 @@
             line-height: 1.4;
             white-space: pre-wrap;
         }
+
+        .counters span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .counter-number {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
@@ -450,8 +460,8 @@
                     </div>
                 </div>
                 <div class="counters">
-                    <span id="post-counter">0 📝</span>
-                    <span id="likes-counter">0 ❤️</span>
+                    <span id="post-counter"><span class="counter-number">0</span> 📝</span>
+                    <span id="likes-counter"><span class="counter-number">0</span> ❤️</span>
                 </div>
             </div>
         </div>

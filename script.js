@@ -370,9 +370,9 @@ function updateTrackingDuration() {
     const likesCounter = document.getElementById('likes-counter');
     const loadingProgress = document.querySelector('.loading-progress');
     
-    // Update counters
-    postCounter.textContent = `${processedPosts.toLocaleString()} 📝`;
-    likesCounter.textContent = `${totalLikes.toLocaleString()} ❤️`;
+    // Update counters with separated numbers and emojis
+    postCounter.innerHTML = `<span class="counter-number">${processedPosts.toLocaleString()}</span> 📝`;
+    likesCounter.innerHTML = `<span class="counter-number">${totalLikes.toLocaleString()}</span> ❤️`;
     
     // Update tracking text and loading bar state
     if (!hasPostWith10Likes) {
