@@ -312,17 +312,19 @@ function updateTopPostsList() {
                         ` : ''}
                     </div>
                 </div>
-                <div class="likes ${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? 'on-fire' : ''}">
-                    ${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? '����' : '❤️'} ${post.likes}
-                </div>
                 <div class="post-content">
                     ${formatMessage(post.message, post.facets)}
                     ${imagesHtml}
                 </div>
                 <div class="post-meta">
-                    <div class="post-links">
-                        <a href="${post.url}" target="_blank">View on Bluesky</a>
-                        ${post.parentUrl ? `<a href="${post.parentUrl}" target="_blank">View Parent Post</a>` : ''}
+                    <div class="meta-left">
+                        <div class="likes ${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? 'on-fire' : ''}">
+                            ${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? '🔥' : '❤️'} ${post.likes}
+                        </div>
+                        <div class="post-links">
+                            <a href="${post.url}" target="_blank">View on Bluesky</a>
+                            ${post.parentUrl ? `<a href="${post.parentUrl}" target="_blank">View Parent Post</a>` : ''}
+                        </div>
                     </div>
                     <div class="meta-info">
                         <span class="rate">${(calculateRecentLikesPerSecond(post)).toFixed(2)}❤️/s</span>
