@@ -355,14 +355,16 @@ function updateTrackingDuration() {
     const trackingText = document.getElementById('tracking-text');
     const postCounter = document.getElementById('post-counter');
     const likesCounter = document.getElementById('likes-counter');
+    const loadingProgress = document.querySelector('.loading-progress');
     
     // Update counters
     postCounter.textContent = `${processedPosts.toLocaleString()} 📝`;
     likesCounter.textContent = `${totalLikes.toLocaleString()} ❤️`;
     
-    // Update tracking text
+    // Update tracking text and loading bar state
     if (!hasPostWith10Likes) {
-        trackingText.textContent = "Listening for new posts...";
+        trackingText.textContent = "Listening for new posts... Please wait.";
+        loadingProgress.classList.remove('tracking');
         return;
     }
     
@@ -372,4 +374,5 @@ function updateTrackingDuration() {
     } else {
         trackingText.textContent = `Live tracking for ${elapsedMinutes} minute${elapsedMinutes === 1 ? '' : 's'}`;
     }
+    loadingProgress.classList.add('tracking');
 }

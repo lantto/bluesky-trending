@@ -20,7 +20,6 @@
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
             padding: 20px;
         }
 
@@ -297,6 +296,85 @@
             align-items: flex-end;
             gap: 5px;
         }
+
+        .status-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(0, 102, 204, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loading-progress {
+            height: 100%;
+            width: 30%;
+            background: #0066cc;
+            border-radius: 2px;
+            animation: loading 2s infinite ease-in-out;
+            position: relative;
+        }
+
+        .loading-progress.tracking {
+            width: 100%;
+            background: linear-gradient(90deg, 
+                rgba(249, 24, 128, 0.2) 0%,
+                rgba(249, 24, 128, 1) 50%,
+                rgba(249, 24, 128, 0.2) 100%
+            );
+            animation: tracking-wave 4s infinite ease-in-out;
+        }
+
+        .loading-progress.tracking::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                transparent 100%
+            );
+            animation: tracking-shine 4s infinite ease-in-out;
+        }
+
+        @keyframes loading {
+            0% {
+                transform: translateX(-100%);
+            }
+            50% {
+                transform: translateX(300%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        @keyframes tracking-wave {
+            0% {
+                background-position: -200px 0;
+            }
+            100% {
+                background-position: 200px 0;
+            }
+        }
+
+        @keyframes tracking-shine {
+            0% {
+                transform: translateX(-200px) skewX(-45deg);
+            }
+            100% {
+                transform: translateX(400px) skewX(-45deg);
+            }
+        }
     </style>
 </head>
 <body>
@@ -304,7 +382,12 @@
         <h1>Bluesky Trending Posts</h1>
         <div class="status-wrapper">
             <div class="status-container">
-                <span id="tracking-text">Listening for new posts...</span>
+                <div class="status-left">
+                    <span id="tracking-text">Listening for new posts... Please wait.</span>
+                    <div class="loading-bar">
+                        <div class="loading-progress"></div>
+                    </div>
+                </div>
                 <div class="counters">
                     <span id="post-counter">0 📝</span>
                     <span id="likes-counter">0 ❤️</span>
