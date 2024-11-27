@@ -57,7 +57,8 @@ function connect() {
                     profile: null,
                     images: getImageUrls(json.commit.record, json.did),
                     timestamp: Date.now(),
-                    firstLikeTimestamp: null
+                    firstLikeTimestamp: null,
+                    rawJson: json
                 };
                 updateTrackingDuration(); // Update the display immediately when a new post arrives
             }
@@ -331,11 +332,15 @@ function updateTopPostsList() {
                             <a href="${post.url}" target="_blank">View on Bluesky</a>
                             ${post.parentUrl ? `<a href="${post.parentUrl}" target="_blank">View Parent Post</a>` : ''}
                         </div>
+                        <button class="show-json-btn" onclick="toggleJson(this)" title="Show raw data">🛠️</button>
                     </div>
                     <div class="meta-info">
                         <span class="rate">${(calculateRecentLikesPerSecond(post)).toFixed(2)}❤️/s</span>
                         <span class="timestamp">${new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
+                </div>
+                <div class="json-container" style="display: none;">
+                    <pre>${JSON.stringify(post.rawJson, null, 2)}</pre>
                 </div>
             `;
             
@@ -388,4 +393,13 @@ function updateTrackingDuration() {
     
     trackingText.textContent = `Tracking for ${timeText}.`;
     loadingProgress.classList.add('tracking');
+}
+
+// Update the toggleJson function
+function toggleJson(button) {
+    const container = button.closest('.post-item').querySelector('.json-container');
+    const isHidden = container.style.display === 'none';
+    container.style.display = isHidden ? 'block' : 'none';
+    button.textContent = isHidden ? '❌' : '🛠️';
+    button.classList.toggle('active', isHidden);
 }
