@@ -12,7 +12,8 @@ const FIRE_THRESHOLD_HIGH = 1.0;  // Threshold to become "on fire"
 const FIRE_THRESHOLD_LOW = 0.8;   // Threshold to lose "on fire" status
 
 // Add these variables near the top with other constants
-let startTime = null;
+let startTime = Date.now();
+let hasPostWith10Likes = false;
 
 function connect() {
     const url = "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.like";
@@ -59,12 +60,12 @@ function connect() {
                 const post = posts[json.commit.record.subject.cid];
                 if (post.likes === 0) {
                     post.firstLikeTimestamp = Date.now();
-                    if (startTime === null) {
-                        startTime = Date.now();
-                        setInterval(updateTrackingDuration, 1000);
-                    }
                 }
                 post.likes++;
+                if (post.likes === 10 && !hasPostWith10Likes) {
+                    hasPostWith10Likes = true;
+                    setInterval(updateTrackingDuration, 1000);
+                }
                 post.likeHistory.push(Date.now());
                 updateTopPostsList();
             }
@@ -338,11 +339,11 @@ function toggleImages(button) {
     button.textContent = isHidden ? 'Hide images' : `Show ${container.children.length} image${container.children.length > 1 ? 's' : ''}`;
 }
 
-// Modify updateTrackingDuration to handle the case when tracking hasn't started
+// Modify updateTrackingDuration
 function updateTrackingDuration() {
     const trackingStatus = document.getElementById('tracking-status');
     
-    if (startTime === null) {
+    if (!hasPostWith10Likes) {
         trackingStatus.textContent = "Gathering posts...";
         return;
     }
