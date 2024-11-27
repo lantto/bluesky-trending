@@ -23,6 +23,9 @@ const INCLUDE_REPLIES = false;
 // Add this constant with the other constants at the top
 const MAX_POST_AGE = 1200000; // 20 minutes in milliseconds
 
+// Add this near the top with other constants
+const secondaryPosts = new Map(); // For tracking posts with <10 likes that were removed
+
 function connect() {
     const url = "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.like";
     
@@ -59,6 +62,7 @@ function connect() {
                         null,
                     profile: null,
                     images: getImageUrls(json.commit.record, json.did),
+                    createdAt: json.commit.record.createdAt,
                     timestamp: Date.now(),
                     firstLikeTimestamp: null,
                     rawJson: json,
@@ -78,9 +82,11 @@ function connect() {
                 totalLikes++;
                 updateTrackingDuration();
 
-                // Handle likes for posts we're tracking
-                if (json.commit.record.subject.cid in posts) {
-                    const post = posts[json.commit.record.subject.cid];
+                const cid = json.commit.record.subject.cid;
+                
+                // Check main posts first
+                if (cid in posts) {
+                    const post = posts[cid];
                     if (post.likes === 0) {
                         post.firstLikeTimestamp = Date.now();
                     }
@@ -91,6 +97,22 @@ function connect() {
                     }
                     post.likeHistory.push(Date.now());
                     updateTopPostsList();
+                } 
+                // Check secondary posts
+                else if (secondaryPosts.has(cid)) {
+                    const post = secondaryPosts.get(cid);
+                    post.likes++;
+                    post.likeHistory.push(Date.now());
+                    
+                    // If post reaches 10 likes, move it back to main posts
+                    if (post.likes >= 10) {
+                        // console.log(`Post ${cid} reached 10 likes - moving back to main posts`);
+                        // Reset timestamp to now to give it a fresh start
+                        post.timestamp = Date.now();
+                        posts[cid] = post;
+                        secondaryPosts.delete(cid);
+                        updateTopPostsList();
+                    }
                 }
             }
         }
@@ -206,6 +228,8 @@ function calculateRecentLikesPerSecond(post) {
 // Modify the cleanupOldPosts function
 function cleanupOldPosts() {
     const now = Date.now();
+    
+    // Clean up main posts
     Object.entries(posts).forEach(([cid, post]) => {
         const postAge = now - post.timestamp;
         
@@ -215,12 +239,30 @@ function cleanupOldPosts() {
             return;
         }
         
-        // Apply the existing cleanup logic for posts within MAX_POST_AGE
+        // Handle cleanup for posts based on likes
         const likesPerSecond = calculateRecentLikesPerSecond(post);
         if (postAge > POST_AGE_LIMIT && likesPerSecond < MIN_LIKES_PER_SECOND) {
-            delete posts[cid];
+            if (post.likes >= 10) {
+                // Remove posts with 10+ likes as before
+                delete posts[cid];
+            } else {
+                // Move posts with <10 likes to secondary map
+                secondaryPosts.set(cid, {
+                    ...post,
+                    removedAt: now
+                });
+                delete posts[cid];
+            }
         }
     });
+    
+    // Clean up secondary posts
+    for (const [cid, post] of secondaryPosts) {
+        const postAge = now - post.timestamp;
+        if (postAge > MAX_POST_AGE) {
+            secondaryPosts.delete(cid);
+        }
+    }
 }
 
 // Modify the updateTopPostsList function to call cleanup before updating
@@ -399,7 +441,7 @@ function updateTopPostsList() {
                         <span class="rate">${(calculateRecentLikesPerSecond(post)).toFixed(2)} ❤️/s</span>
                         <a href="${post.url}" target="_blank" class="view-link">View on Bluesky</a>
                         <button class="show-json-btn" onclick="toggleJson(this)" title="Show raw data">🛠️</button>
-                        <span class="timestamp">${new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span class="timestamp">${new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                 </div>
                 <div class="json-container" style="display: none;">
