@@ -26,6 +26,10 @@ const MAX_POST_AGE = 1200000; // 20 minutes in milliseconds
 // Add this near the top with other constants
 const secondaryPosts = new Map(); // For tracking posts with <10 likes that were removed
 
+// Add this with other constants at the top
+const urlParams = new URLSearchParams(window.location.search);
+const FOLLOWER_LIMIT = parseInt(urlParams.get('followerLimit')) || 0; // 0 means no limit
+
 function connect() {
     const url = "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.like";
     
@@ -279,7 +283,7 @@ function updateTopPostsList() {
     // Add this line at the start of the function
     cleanupOldPosts();
     
-    const topPostsDiv = document.getElementById('topPosts');
+    const topPostsDiv = document.getElementById('top-posts');
     const postsArray = Object.entries(posts)
         .filter(([_, post]) => post.likes > 0)
         .sort((a, b) => {
@@ -300,6 +304,14 @@ function updateTopPostsList() {
                 fetchProfile(post.did).then(profile => {
                     post.profile = profile;
                     post.fetchingProfile = false;
+                    
+                    // Remove post if user exceeds follower limit (when limit is enabled)
+                    if (FOLLOWER_LIMIT > 0 && profile && profile.followersCount > FOLLOWER_LIMIT) {
+                        delete posts[cid];
+                        updateTopPostsList(); // Refresh the list
+                        return;
+                    }
+                    
                     updateTopPostsList();
                 });
             }
