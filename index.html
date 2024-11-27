@@ -590,9 +590,36 @@
         .view-link:hover {
             background: rgba(0, 102, 204, 0.15);
         }
+
+        .follow-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            text-decoration: none;
+            color: #536471;
+            font-size: 0.9em;
+            z-index: 1000;
+            transition: color 0.2s ease;
+        }
+
+        .follow-button:hover {
+            color: #0066cc;
+        }
+
+        @media (max-width: 768px) {
+            .follow-button {
+                position: static;
+                display: block;
+                text-align: center;
+                margin: 10px auto;
+            }
+        }
     </style>
 </head>
 <body>
+    <a href="https://bsky.app/profile/lantto.bsky.social" target="_blank" class="follow-button">
+        made by @lantto.bsky.social
+    </a>
     <div class="header">
         <h1>Bluesky Trending Posts</h1>
         <div class="status-wrapper">
