@@ -378,9 +378,6 @@ function updateTopPostsList() {
                     ${formatMessage(post.message, post.facets)}
                     ${imagesHtml}
                     ${embedHtml}
-                    <div class="tools-group">
-                        <button class="show-json-btn" onclick="toggleJson(this)" title="Show raw data">🛠️</button>
-                    </div>
                 </div>
                 <div class="post-meta">
                     <div class="meta-group likes-group">
@@ -388,14 +385,10 @@ function updateTopPostsList() {
                             ${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? '🔥' : '❤️'} ${post.likes}
                         </div>
                     </div>
-                    <div class="meta-group links-group">
-                        <div class="post-links">
-                            <a href="${post.url}" target="_blank">View on Bluesky</a>
-                            ${post.parentUrl ? `<a href="${post.parentUrl}" target="_blank">View Parent Post</a>` : ''}
-                        </div>
-                    </div>
                     <div class="meta-group stats-group">
                         <span class="rate">${(calculateRecentLikesPerSecond(post)).toFixed(2)}❤️/s</span>
+                        <a href="${post.url}" target="_blank" class="view-link">View on Bluesky</a>
+                        <button class="show-json-btn" onclick="toggleJson(this)" title="Show raw data">🛠️</button>
                         <span class="timestamp">${new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                 </div>
