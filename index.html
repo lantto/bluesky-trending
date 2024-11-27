@@ -267,12 +267,25 @@
             color: #f91880;
             font-weight: 500;
         }
+
+        .status-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 700px;
+            margin: 0 auto;
+            color: #536471;
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Bluesky Trending Posts</h1>
-        <p id="tracking-status">Gathering posts... Please wait.</p>
+        <div class="status-container">
+            <span id="tracking-text">Gathering posts... Please wait.</span>
+            <span id="post-counter">0 posts processed</span>
+        </div>
     </div>
     <div id="topPosts" class="post-list"></div>
     <script src="script.js"></script>

@@ -14,6 +14,7 @@ const FIRE_THRESHOLD_LOW = 0.8;   // Threshold to lose "on fire" status
 // Add these variables near the top with other constants
 let startTime = Date.now();
 let hasPostWith10Likes = false;
+let processedPosts = 0;
 
 function connect() {
     const url = "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.like";
@@ -35,6 +36,7 @@ function connect() {
             if (!json.commit.record) return;
 
             if (json.commit.operation === 'create') {
+                processedPosts++;
                 posts[json.commit.cid] = {
                     message: json.commit.record.text,
                     facets: json.commit.record.facets,
@@ -50,6 +52,7 @@ function connect() {
                     timestamp: Date.now(),
                     firstLikeTimestamp: null
                 };
+                updateTrackingDuration(); // Update the display immediately when a new post arrives
             }
         }
 
@@ -341,17 +344,22 @@ function toggleImages(button) {
 
 // Modify updateTrackingDuration
 function updateTrackingDuration() {
-    const trackingStatus = document.getElementById('tracking-status');
+    const trackingText = document.getElementById('tracking-text');
+    const postCounter = document.getElementById('post-counter');
     
+    // Update post counter
+    postCounter.textContent = `${processedPosts.toLocaleString()} posts processed`;
+    
+    // Update tracking text
     if (!hasPostWith10Likes) {
-        trackingStatus.textContent = "Gathering posts...";
+        trackingText.textContent = "Gathering posts... Please wait.";
         return;
     }
     
     const elapsedMinutes = Math.floor((Date.now() - startTime) / 60000);
     if (elapsedMinutes < 1) {
-        trackingStatus.textContent = "Tracking for <1 minute";
+        trackingText.textContent = "Tracking for <1 minute";
     } else {
-        trackingStatus.textContent = `Tracking for ${elapsedMinutes} minute${elapsedMinutes === 1 ? '' : 's'}`;
+        trackingText.textContent = `Tracking for ${elapsedMinutes} minute${elapsedMinutes === 1 ? '' : 's'}`;
     }
 }
