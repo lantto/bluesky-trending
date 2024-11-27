@@ -20,6 +20,9 @@ let totalLikes = 0;
 // Add this with the other constants at the top of the file
 const INCLUDE_REPLIES = false;
 
+// Add this constant with the other constants at the top
+const MAX_POST_AGE = 1200000; // 20 minutes in milliseconds
+
 function connect() {
     const url = "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.like";
     
@@ -200,13 +203,20 @@ function calculateRecentLikesPerSecond(post) {
     return recentLikes / timeWindow;
 }
 
-// Add this function to clean up old posts
+// Modify the cleanupOldPosts function
 function cleanupOldPosts() {
     const now = Date.now();
     Object.entries(posts).forEach(([cid, post]) => {
         const postAge = now - post.timestamp;
-        const likesPerSecond = calculateRecentLikesPerSecond(post);
         
+        // Always remove posts older than MAX_POST_AGE
+        if (postAge > MAX_POST_AGE) {
+            delete posts[cid];
+            return;
+        }
+        
+        // Apply the existing cleanup logic for posts within MAX_POST_AGE
+        const likesPerSecond = calculateRecentLikesPerSecond(post);
         if (postAge > POST_AGE_LIMIT && likesPerSecond < MIN_LIKES_PER_SECOND) {
             delete posts[cid];
         }
