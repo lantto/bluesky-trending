@@ -277,14 +277,39 @@
             color: #536471;
             font-size: 1.1em;
         }
+
+        .status-wrapper {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .status-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            color: #536471;
+            font-size: 1.1em;
+        }
+
+        .counters {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Bluesky Trending Posts</h1>
-        <div class="status-container">
-            <span id="tracking-text">Gathering posts... Please wait.</span>
-            <span id="post-counter">0 posts processed</span>
+        <div class="status-wrapper">
+            <div class="status-container">
+                <span id="tracking-text">Listening for new posts...</span>
+                <div class="counters">
+                    <span id="post-counter">0 📝</span>
+                    <span id="likes-counter">0 ❤️</span>
+                </div>
+            </div>
         </div>
     </div>
     <div id="topPosts" class="post-list"></div>

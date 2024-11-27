@@ -15,6 +15,7 @@ const FIRE_THRESHOLD_LOW = 0.8;   // Threshold to lose "on fire" status
 let startTime = Date.now();
 let hasPostWith10Likes = false;
 let processedPosts = 0;
+let totalLikes = 0;
 
 function connect() {
     const url = "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.like";
@@ -59,18 +60,25 @@ function connect() {
         if (json.commit.collection === 'app.bsky.feed.like') {
             if (!json.commit.record) return;
 
-            if (json.commit.operation === 'create' && json.commit.record.subject.cid in posts) {
-                const post = posts[json.commit.record.subject.cid];
-                if (post.likes === 0) {
-                    post.firstLikeTimestamp = Date.now();
+            if (json.commit.operation === 'create') {
+                // Increment total likes for ALL likes
+                totalLikes++;
+                updateTrackingDuration();
+
+                // Handle likes for posts we're tracking
+                if (json.commit.record.subject.cid in posts) {
+                    const post = posts[json.commit.record.subject.cid];
+                    if (post.likes === 0) {
+                        post.firstLikeTimestamp = Date.now();
+                    }
+                    post.likes++;
+                    if (post.likes === 10 && !hasPostWith10Likes) {
+                        hasPostWith10Likes = true;
+                        setInterval(updateTrackingDuration, 1000);
+                    }
+                    post.likeHistory.push(Date.now());
+                    updateTopPostsList();
                 }
-                post.likes++;
-                if (post.likes === 10 && !hasPostWith10Likes) {
-                    hasPostWith10Likes = true;
-                    setInterval(updateTrackingDuration, 1000);
-                }
-                post.likeHistory.push(Date.now());
-                updateTopPostsList();
             }
         }
     };
@@ -346,20 +354,22 @@ function toggleImages(button) {
 function updateTrackingDuration() {
     const trackingText = document.getElementById('tracking-text');
     const postCounter = document.getElementById('post-counter');
+    const likesCounter = document.getElementById('likes-counter');
     
-    // Update post counter
-    postCounter.textContent = `${processedPosts.toLocaleString()} posts processed`;
+    // Update counters
+    postCounter.textContent = `${processedPosts.toLocaleString()} 📝`;
+    likesCounter.textContent = `${totalLikes.toLocaleString()} ❤️`;
     
     // Update tracking text
     if (!hasPostWith10Likes) {
-        trackingText.textContent = "Gathering posts... Please wait.";
+        trackingText.textContent = "Listening for new posts...";
         return;
     }
     
     const elapsedMinutes = Math.floor((Date.now() - startTime) / 60000);
     if (elapsedMinutes < 1) {
-        trackingText.textContent = "Tracking for <1 minute";
+        trackingText.textContent = "Live tracking for <1 minute";
     } else {
-        trackingText.textContent = `Tracking for ${elapsedMinutes} minute${elapsedMinutes === 1 ? '' : 's'}`;
+        trackingText.textContent = `Live tracking for ${elapsedMinutes} minute${elapsedMinutes === 1 ? '' : 's'}`;
     }
 }
