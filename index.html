@@ -243,10 +243,33 @@
             margin-top: 15px;
             padding-top: 15px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
+        }
+
+        .meta-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .likes-group {
+            flex-shrink: 0;
+        }
+
+        .links-group {
+            flex-grow: 1;
+        }
+
+        .tools-group {
+            flex-shrink: 0;
+        }
+
+        .stats-group {
+            flex-shrink: 0;
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .likes.on-fire {
@@ -266,19 +289,6 @@
             100% {
                 transform: scale(1);
             }
-        }
-
-        .meta-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: #536471;
-            font-size: 0.9em;
-        }
-
-        .rate {
-            color: #f91880;
-            font-weight: 500;
         }
 
         .status-container {
@@ -388,16 +398,6 @@
             100% {
                 transform: translateX(400px) skewX(-45deg);
             }
-        }
-
-        .meta-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .likes {
-            margin: 0;
         }
 
         .show-json-btn {

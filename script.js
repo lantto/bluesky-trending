@@ -324,17 +324,21 @@ function updateTopPostsList() {
                     ${imagesHtml}
                 </div>
                 <div class="post-meta">
-                    <div class="meta-left">
+                    <div class="meta-group likes-group">
                         <div class="likes ${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? 'on-fire' : ''}">
                             ${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? '🔥' : '❤️'} ${post.likes}
                         </div>
+                    </div>
+                    <div class="meta-group links-group">
                         <div class="post-links">
                             <a href="${post.url}" target="_blank">View on Bluesky</a>
                             ${post.parentUrl ? `<a href="${post.parentUrl}" target="_blank">View Parent Post</a>` : ''}
                         </div>
+                    </div>
+                    <div class="meta-group tools-group">
                         <button class="show-json-btn" onclick="toggleJson(this)" title="Show raw data">🛠️</button>
                     </div>
-                    <div class="meta-info">
+                    <div class="meta-group stats-group">
                         <span class="rate">${(calculateRecentLikesPerSecond(post)).toFixed(2)}❤️/s</span>
                         <span class="timestamp">${new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
