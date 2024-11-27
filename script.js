@@ -60,7 +60,8 @@ function connect() {
                     firstLikeTimestamp: null,
                     rawJson: json,
                     embed: getExternalEmbed(json.commit.record, json.did) || 
-                           getRecordEmbed(json.commit.record),
+                           getRecordEmbed(json.commit.record) ||
+                           getVideoEmbed(json.commit.record, json.did),
                 };
                 updateTrackingDuration(); // Update the display immediately when a new post arrives
             }
@@ -326,6 +327,16 @@ function updateTopPostsList() {
                             View quoted post ↗
                         </a>
                     </div>
+                ` : post.embed.type === 'video' ? `
+                    <div class="post-embed video-embed">
+                        <div class="video-indicator">
+                            <span class="video-icon">🎥</span>
+                            Video content
+                            <a href="${post.url}" target="_blank" class="view-video-link">
+                                View on Bluesky ↗
+                            </a>
+                        </div>
+                    </div>
                 ` : `
                     <div class="post-embed">
                         <button class="show-embed-btn" onclick="toggleEmbed(this)">
@@ -476,5 +487,18 @@ function getRecordEmbed(record) {
         uri: uri,
         url: `https://bsky.app/profile/${did}/post/${rkey}`,
         cid: record.embed.record.cid
+    };
+}
+
+// Add this function near getImageUrls and getExternalEmbed
+function getVideoEmbed(record, did) {
+    if (!record.embed || record.embed.$type !== 'app.bsky.embed.video') {
+        return null;
+    }
+    
+    return {
+        type: 'video',
+        aspectRatio: record.embed.video.aspectRatio,
+        mimeType: record.embed.video.mimeType
     };
 }
