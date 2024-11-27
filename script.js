@@ -106,7 +106,8 @@ function connect() {
                     
                     // If post reaches 10 likes, move it back to main posts
                     if (post.likes >= 10) {
-                        // console.log(`Post ${cid} reached 10 likes - moving back to main posts`);
+                        // const timeSinceRemoved = Date.now() - post.removedAt;
+                        // console.log(`Post ${cid} reached 10 likes - moving back to main posts. Time since removed: ${timeSinceRemoved} ms`);
                         // Reset timestamp to now to give it a fresh start
                         post.timestamp = Date.now();
                         posts[cid] = post;
@@ -244,6 +245,14 @@ function cleanupOldPosts() {
         if (postAge > POST_AGE_LIMIT && likesPerSecond < MIN_LIKES_PER_SECOND) {
             if (post.likes >= 10) {
                 // Remove posts with 10+ likes as before
+                // Log info about posts that got a second chance
+                if (post.removedAt) {
+                    const timeInSecondary = now - post.removedAt;
+                    if (post.likes > 30) {
+                        // See how often posts with 30+ likes make it back to the main list
+                        console.log(`Post ${cid} had a second chance - Time in secondary: ${timeInSecondary} ms, Final likes: ${post.likes}`);
+                    }
+                }
                 delete posts[cid];
             } else {
                 // Move posts with <10 likes to secondary map
