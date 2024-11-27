@@ -274,7 +274,7 @@ function updateTopPostsList() {
             
             // Add rate update
             const rateSpan = existingElement.querySelector('.rate');
-            rateSpan.textContent = `${likesPerSecond.toFixed(2)}❤️/s`;
+            rateSpan.textContent = `${likesPerSecond.toFixed(2)} ❤️/s`;
             
             // Update profile info if it was just fetched
             if (post.profile && existingElement.querySelector('.display-name').textContent === 'Loading...') {
@@ -386,7 +386,7 @@ function updateTopPostsList() {
                         </div>
                     </div>
                     <div class="meta-group stats-group">
-                        <span class="rate">${(calculateRecentLikesPerSecond(post)).toFixed(2)}❤️/s</span>
+                        <span class="rate">${(calculateRecentLikesPerSecond(post)).toFixed(2)} ❤️/s</span>
                         <a href="${post.url}" target="_blank" class="view-link">View on Bluesky</a>
                         <button class="show-json-btn" onclick="toggleJson(this)" title="Show raw data">🛠️</button>
                         <span class="timestamp">${new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
