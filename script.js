@@ -59,7 +59,8 @@ function connect() {
                     timestamp: Date.now(),
                     firstLikeTimestamp: null,
                     rawJson: json,
-                    embed: getExternalEmbed(json.commit.record, json.did),
+                    embed: getExternalEmbed(json.commit.record, json.did) || 
+                           getRecordEmbed(json.commit.record),
                 };
                 updateTrackingDuration(); // Update the display immediately when a new post arrives
             }
@@ -318,23 +319,30 @@ function updateTopPostsList() {
                 </div>
             ` : '';
 
-            const embedHtml = post.embed ? `
-                <div class="post-embed">
-                    <button class="show-embed-btn" onclick="toggleEmbed(this)">
-                        Show external content
-                    </button>
-                    <div class="embed-container" style="display: none;">
-                        <a href="${post.embed.uri}" target="_blank" class="embed-link">
-                            ${post.embed.thumb ? `<img src="${post.embed.thumb}" alt="Embed thumbnail" loading="lazy">` : ''}
-                            <div class="embed-content">
-                                <h3 class="embed-title">${post.embed.title}</h3>
-                                <p class="embed-description">${post.embed.description}</p>
-                                <span class="embed-url">${new URL(post.embed.uri).hostname}</span>
-                            </div>
+            const embedHtml = post.embed ? 
+                post.embed.type === 'record' ? `
+                    <div class="post-embed">
+                        <a href="${post.embed.url}" target="_blank" class="quoted-post-link">
+                            View quoted post ↗
                         </a>
                     </div>
-                </div>
-            ` : '';
+                ` : `
+                    <div class="post-embed">
+                        <button class="show-embed-btn" onclick="toggleEmbed(this)">
+                            Show external content
+                        </button>
+                        <div class="embed-container" style="display: none;">
+                            <a href="${post.embed.uri}" target="_blank" class="embed-link">
+                                ${post.embed.thumb ? `<img src="${post.embed.thumb}" alt="Embed thumbnail" loading="lazy">` : ''}
+                                <div class="embed-content">
+                                    <h3 class="embed-title">${post.embed.title}</h3>
+                                    <p class="embed-description">${post.embed.description}</p>
+                                    <span class="embed-url">${new URL(post.embed.uri).hostname}</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                ` : '';
 
             newElement.innerHTML = `
                 <div class="profile-info">
@@ -451,4 +459,22 @@ function toggleJson(button) {
     container.style.display = isHidden ? 'block' : 'none';
     button.textContent = isHidden ? '❌' : '🛠️';
     button.classList.toggle('active', isHidden);
+}
+
+// Add this function near getExternalEmbed
+function getRecordEmbed(record) {
+    if (!record.embed || record.embed.$type !== 'app.bsky.embed.record') {
+        return null;
+    }
+    
+    const uri = record.embed.record.uri;
+    // Extract did and rkey from the uri (at://did:plc:xyz/app.bsky.feed.post/123)
+    const [did, rkey] = uri.split('//')[1].split('/app.bsky.feed.post/');
+    
+    return {
+        type: 'record',
+        uri: uri,
+        url: `https://bsky.app/profile/${did}/post/${rkey}`,
+        cid: record.embed.record.cid
+    };
 }
