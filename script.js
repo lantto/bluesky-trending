@@ -17,6 +17,9 @@ let hasPostWith10Likes = false;
 let processedPosts = 0;
 let totalLikes = 0;
 
+// Add this with the other constants at the top of the file
+const INCLUDE_REPLIES = false;
+
 function connect() {
     const url = "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.like";
     
@@ -37,6 +40,9 @@ function connect() {
             if (!json.commit.record) return;
 
             if (json.commit.operation === 'create') {
+                // Skip replies if INCLUDE_REPLIES is false
+                if (!INCLUDE_REPLIES && json.commit.record.reply) return;
+
                 processedPosts++;
                 posts[json.commit.cid] = {
                     message: json.commit.record.text,
