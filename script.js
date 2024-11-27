@@ -350,7 +350,7 @@ function updateTopPostsList() {
             rateSpan.textContent = `${likesPerSecond.toFixed(2)} ❤️/s`;
             
             // Update profile info if it was just fetched
-            if (post.profile && existingElement.querySelector('.display-name').textContent === 'Loading...') {
+            if (post.profile && existingElement.querySelector('.display-name').textContent === '🦋') {
                 const profileInfo = existingElement.querySelector('.profile-info');
                 profileInfo.innerHTML = `
                     <img src="${post.profile.avatar}" class="avatar" alt="Profile picture">
@@ -436,7 +436,7 @@ function updateTopPostsList() {
                     }
                     <div class="profile-details">
                         <div class="name-handle">
-                            <div class="display-name">${post.profile ? post.profile.displayName : 'Loading...'}</div>
+                            <div class="display-name">${post.profile ? post.profile.displayName : '🦋'}</div>
                             <div class="handle">${post.profile ? `@${post.profile.handle}` : `@${post.did.slice(0, 8)}...`}</div>
                         </div>
                         ${post.profile ? `
@@ -480,7 +480,6 @@ function updateTopPostsList() {
     
     existingPosts.forEach(element => element.remove());
 }
-
 // Add this function to handle image toggling
 function toggleImages(button) {
     const container = button.nextElementSibling;
