@@ -371,13 +371,13 @@ function updateTrackingDuration() {
     const elapsedMinutes = Math.floor((Date.now() - startTime) / 60000);
     let timeText;
     if (elapsedMinutes < 1) {
-        timeText = "less than a minute";
+        timeText = "<1 minute";
     } else if (elapsedMinutes === 1) {
-        timeText = "the past 1 minute";
+        timeText = "1 minute";
     } else {
-        timeText = `the past ${elapsedMinutes} minutes`;
+        timeText = `${elapsedMinutes} minutes`;
     }
     
-    trackingText.textContent = `Analyzing trending posts from ${timeText}...`;
+    trackingText.textContent = `Tracking for ${timeText}.`;
     loadingProgress.classList.add('tracking');
 }
