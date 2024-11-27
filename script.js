@@ -322,6 +322,9 @@ function updateTopPostsList() {
                 <div class="post-content">
                     ${formatMessage(post.message, post.facets)}
                     ${imagesHtml}
+                    <div class="tools-group">
+                        <button class="show-json-btn" onclick="toggleJson(this)" title="Show raw data">🛠️</button>
+                    </div>
                 </div>
                 <div class="post-meta">
                     <div class="meta-group likes-group">
@@ -334,9 +337,6 @@ function updateTopPostsList() {
                             <a href="${post.url}" target="_blank">View on Bluesky</a>
                             ${post.parentUrl ? `<a href="${post.parentUrl}" target="_blank">View Parent Post</a>` : ''}
                         </div>
-                    </div>
-                    <div class="meta-group tools-group">
-                        <button class="show-json-btn" onclick="toggleJson(this)" title="Show raw data">🛠️</button>
                     </div>
                     <div class="meta-group stats-group">
                         <span class="rate">${(calculateRecentLikesPerSecond(post)).toFixed(2)}❤️/s</span>
