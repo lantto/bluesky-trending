@@ -313,7 +313,7 @@ function updateTopPostsList() {
                     </div>
                 </div>
                 <div class="likes ${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? 'on-fire' : ''}">
-                    ${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? '🔥' : '❤️'} ${post.likes}
+                    ${(post.likes >= 10 && calculateRecentLikesPerSecond(post) >= FIRE_THRESHOLD_HIGH) ? '����' : '❤️'} ${post.likes}
                 </div>
                 <div class="post-content">
                     ${formatMessage(post.message, post.facets)}
@@ -369,10 +369,15 @@ function updateTrackingDuration() {
     }
     
     const elapsedMinutes = Math.floor((Date.now() - startTime) / 60000);
+    let timeText;
     if (elapsedMinutes < 1) {
-        trackingText.textContent = "Live tracking for <1 minute";
+        timeText = "less than a minute";
+    } else if (elapsedMinutes === 1) {
+        timeText = "the past 1 minute";
     } else {
-        trackingText.textContent = `Live tracking for ${elapsedMinutes} minute${elapsedMinutes === 1 ? '' : 's'}`;
+        timeText = `the past ${elapsedMinutes} minutes`;
     }
+    
+    trackingText.textContent = `Analyzing trending posts from ${timeText}...`;
     loadingProgress.classList.add('tracking');
 }
