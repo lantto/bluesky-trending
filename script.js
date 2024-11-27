@@ -58,7 +58,8 @@ function connect() {
                     images: getImageUrls(json.commit.record, json.did),
                     timestamp: Date.now(),
                     firstLikeTimestamp: null,
-                    rawJson: json
+                    rawJson: json,
+                    embed: getExternalEmbed(json.commit.record, json.did),
                 };
                 updateTrackingDuration(); // Update the display immediately when a new post arrives
             }
@@ -162,6 +163,23 @@ function getImageUrls(record, did) {
         url: `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${image.image.ref.$link}@jpeg`,
         alt: image.alt || ''
     }));
+}
+
+// Add this function to handle external embeds
+function getExternalEmbed(record, did) {
+    if (!record.embed || record.embed.$type !== 'app.bsky.embed.external') {
+        return null;
+    }
+    
+    const external = record.embed.external;
+    return {
+        title: external.title,
+        description: external.description,
+        uri: external.uri,
+        thumb: external.thumb ? 
+            `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${external.thumb.ref.$link}@jpeg` : 
+            null
+    };
 }
 
 // Add this function to calculate recent likes per second
@@ -300,6 +318,24 @@ function updateTopPostsList() {
                 </div>
             ` : '';
 
+            const embedHtml = post.embed ? `
+                <div class="post-embed">
+                    <button class="show-embed-btn" onclick="toggleEmbed(this)">
+                        Show external content
+                    </button>
+                    <div class="embed-container" style="display: none;">
+                        <a href="${post.embed.uri}" target="_blank" class="embed-link">
+                            ${post.embed.thumb ? `<img src="${post.embed.thumb}" alt="Embed thumbnail" loading="lazy">` : ''}
+                            <div class="embed-content">
+                                <h3 class="embed-title">${post.embed.title}</h3>
+                                <p class="embed-description">${post.embed.description}</p>
+                                <span class="embed-url">${new URL(post.embed.uri).hostname}</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            ` : '';
+
             newElement.innerHTML = `
                 <div class="profile-info">
                     ${post.profile ? 
@@ -322,6 +358,7 @@ function updateTopPostsList() {
                 <div class="post-content">
                     ${formatMessage(post.message, post.facets)}
                     ${imagesHtml}
+                    ${embedHtml}
                     <div class="tools-group">
                         <button class="show-json-btn" onclick="toggleJson(this)" title="Show raw data">🛠️</button>
                     </div>
@@ -365,6 +402,14 @@ function toggleImages(button) {
     const isHidden = container.style.display === 'none';
     container.style.display = isHidden ? 'grid' : 'none';
     button.textContent = isHidden ? 'Hide images' : `Show ${container.children.length} image${container.children.length > 1 ? 's' : ''}`;
+}
+
+// Add this function to handle external embed toggling
+function toggleEmbed(button) {
+    const container = button.nextElementSibling;
+    const isHidden = container.style.display === 'none';
+    container.style.display = isHidden ? 'block' : 'none';
+    button.textContent = isHidden ? 'Hide external content' : 'Show external content';
 }
 
 // Modify updateTrackingDuration
